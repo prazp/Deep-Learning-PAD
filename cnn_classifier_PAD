@@ -35,23 +35,12 @@ for i in trn_label_array:
 	else:
 		trn_label.append(1)
 
-
+#label data
 pickle_in = open(os.path.join(DATADIR, "ASVspoof2017_V2_train.pickle"), "rb")
 trn_data = pickle.load(pickle_in)
 melResultsTrain = []
 
-# #genuine
-# for i in range(0,500):	
-# 	ps = librosa.feature.melspectrogram(trn_data[i].astype(float)[0:15999],sr=16000)
-# 	if ps.shape != (128, 64): continue
-# 	melResultsTrain.append((ps, trn_label[i]))
-
-# #spoof
-# for i in range(len(trn_data)-1500, len(trn_data)):	
-# 	ps = librosa.feature.melspectrogram(trn_data[i].astype(float)[0:15999],sr=16000)
-# 	if ps.shape != (128, 64): continue
-# 	melResultsTrain.append((ps, trn_label[i]))
-
+#extracting MFCC spectrogram from speech data
 for i in range(len(trn_data)):
 	ps = librosa.feature.melspectrogram(trn_data[i].astype(float)[0:32500],sr=16000)
 	if ps.shape != (128, 64): continue
@@ -69,38 +58,41 @@ for i in trn_label_array:
 	else:
 		trn_label.append(1)
 
+#label data
 pickle_in = open(os.path.join(DATADIR, "ASVspoof2017_V2_dev.pickle"), "rb")
 trn_data = pickle.load(pickle_in)
 melResultsDev = []
 
+#extracting MFCC spectrogram from speech data
 for i in range(len(trn_data)):	
 	ps = librosa.feature.melspectrogram(trn_data[i].astype(float)[0:32500],sr=16000)
 	if ps.shape != (128, 64): continue
 	melResultsDev.append((ps, trn_label[i]))
 
-#need to do the following as I shuffle the data
+#randomise the data 
 random.shuffle(melResultsTrain)
 
-#need to normalise the data
-
+#extract training data and labels after shuffling
 X_train = []
 y_train = []
 for res in melResultsTrain:
 	X_train.append(res[0])
 	y_train.append(res[1])
 
+#extract evaluation data and labels after shuffling
 X_test = []
 y_test = []
 for res in melResultsDev:
 	X_test.append(res[0])
 	y_test.append(res[1])
 
-print("Data Ready for Model")
-
-# Reshape for CNN input
+#need to normalise the data
 X_train = tf.keras.utils.normalize(X_train, axis=1)
 X_test = tf.keras.utils.normalize(X_test, axis=1)
 
+print("Data Ready for Model")
+
+#reshape data so that it can be fed into CNN
 X_train = np.array([x.reshape( (128, 64, 1) ) for x in X_train])
 X_test = np.array([x.reshape( (128, 64, 1) ) for x in X_test])
 
@@ -109,8 +101,8 @@ y_train = np.array(keras.utils.to_categorical(y_train, 2))
 y_saved = y_test
 y_test = np.array(keras.utils.to_categorical(y_test, 2))
 
-#keras.normalise can be used
 
+#neural network architecture
 model = Sequential()
 input_shape=(128, 64, 1)
 
@@ -149,6 +141,7 @@ model.compile(
 	loss="binary_crossentropy",
 	metrics=['accuracy'])
 
+#train neural network
 model.fit(
 	x=X_train, 
 	y=y_train,
@@ -156,18 +149,12 @@ model.fit(
     batch_size=64,
     validation_data= (X_test, y_test), callbacks=[tensorboard])
 
-score = model.evaluate(
-	x=X_test,
-	y=y_test)
-
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
-
+#extract predicted posterior probabilities
 predictions = model.predict(x=X_test)
 print(predictions)
 
+#procedure to calculate EER
 final = []
-
 for pred in predictions:
 	final.append(pred[1])
 
