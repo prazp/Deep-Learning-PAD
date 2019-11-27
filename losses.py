@@ -1,4 +1,5 @@
 """
+Author: https://github.com/umbertogriffo/focal-loss-keras/blob/master/losses.py
 Define our custom loss function.
 """
 from tensorflow.python.keras import backend as K
