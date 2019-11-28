@@ -1,0 +1,116 @@
+%%pathToDatabase = "../../../g/data1a/wa66/Prasanth";
+
+addpath(genpath('modified_group_delay_feature'));
+
+pathToDatabase = fullfile('..', '..', 'ASVspoof2017');
+trainProtocolFile = fullfile('..', '..', 'ASVspoof2017', 'protocol_V2', 'ASVspoof2017_V2_train.trn.txt');
+devProtocolFile = fullfile('..', '..', 'ASVspoof2017', 'protocol_V2', 'ASVspoof2017_V2_dev.trl.txt');
+evalProtocolFile = fullfile('..', '..', 'ASVspoof2017', 'protocol_V2', 'ASVspoof2017_V2_eval.trl.txt');
+
+% read train protocol
+fileID = fopen(trainProtocolFile);
+protocol = textscan(fileID, '%s%s%s%s%s');
+fclose(fileID);
+
+% get file and label lists
+filelist = protocol{1};
+key = protocol{2};
+
+% get indices of genuine and spoof files
+genuineIdx = find(strcmp(key,'genuine'));
+spoofIdx = find(strcmp(key,'spoof'));
+
+%% Feature extraction for training data
+
+%extract features for GENUINE training data and store in cell array
+disp('Extracting features for GENUINE training data...');
+genuineFeatureCell = cell(size(genuineIdx));
+for i=1:length(genuineIdx)
+    filePath = fullfile(pathToDatabase,'ASVspoof2017_V2_train',filelist{genuineIdx(i)});
+    [grp_phase, ~, ts] = modified_group_delay_feature(filePath);
+    genuineFeatureCell{i} = grp_phase;
+%    [speech, fs]  = audioread(filePath);
+%     figure;
+%     fig(1) = subplot(211);
+%         times = (0:length(speech)-1)/fs;
+%         plot(times, speech, 'k');
+%         ylim(0.6*[-1, 1]);
+%         xlabel('Time [s]');
+%         ylabel('Amplitude');
+% 
+%     fig(2) = subplot(212);
+%         F = fs*(0:513)/1024;
+%         imagesc(ts, F, grp_phase);
+%         axis xy;
+%         colorbar;
+%         title('Modified Group Delay');
+%         xlabel('Time [s]');
+%         ylabel('Frequency [Hz]');
+end
+disp('Done!');
+
+% extract features for SPOOF training data and store in cell array
+disp('Extracting features for SPOOF training data...');
+spoofFeatureCell = cell(size(spoofIdx));
+for i=1:length(spoofIdx)
+    filePath = fullfile(pathToDatabase,'ASVspoof2017_V2_train',filelist{spoofIdx(i)});
+    [grp_phase, ~, ts] = modified_group_delay_feature(filePath);
+    spoofFeatureCell{i} = grp_phase;
+%     [speech, fs]  = audioread(filePath);
+%     figure;
+%     fig(1) = subplot(211);
+%         times = (0:length(speech)-1)/fs;
+%         plot(times, speech, 'k');
+%         ylim(0.6*[-1, 1]);
+%         xlabel('Time [s]');
+%         ylabel('Amplitude');
+% 
+%     fig(2) = subplot(212);
+%         F = fs*(0:513)/1024;
+%         imagesc(ts, F, grp_phase);
+%         colorbar;
+%         %surf(ts, transpose(F), grp_phase);
+%         axis xy;
+%         title('Modified Group Delay');
+%         xlabel('Time [s]');
+%         ylabel('Frequency [Hz]');
+end
+disp('Done Training!');
+
+trainFeatures = [genuineFeatureCell; spoofFeatureCell];
+
+% read development protocol
+fileID = fopen(devProtocolFile);
+protocol = textscan(fileID, '%s%s%s%s%s%s%s');
+fclose(fileID);
+
+% get file and label lists
+filelist = protocol{1};
+labels = protocol{2};
+
+% process each development trial: feature extraction and scoring
+devFeatures = cell(1710, 1);
+parfor i=1:length(filelist)
+    filePath = fullfile(pathToDatabase,'ASVspoof2017_V2_dev',filelist{i});
+    [grp_phase, ~, ts] = modified_group_delay_feature(filePath);
+    devFeatures{i} = grp_phase;
+end
+disp('Done Development!');
+
+%% read evaluation protocol
+fileID = fopen(evalProtocolFile);
+protocol = textscan(fileID, '%s%s%s%s%s%s%s');
+fclose(fileID);
+
+% get file and label lists
+filelist = protocol{1};
+labels = protocol{2};
+
+% process each development trial: feature extraction and scoring
+evalFeatures = cell(13306, 1);
+parfor i=1:length(filelist)
+    filePath = fullfile(pathToDatabase,'ASVspoof2017_V2_eval',filelist{i});
+    [grp_phase, ~, ts] = modified_group_delay_feature(filePath);
+    evalFeatures{i} = grp_phase;
+end
+disp('Done Evaluation!');
