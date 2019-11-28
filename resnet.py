@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-%https://github.com/raghakot/keras-resnet/blob/master/resnet.py
+#https://github.com/raghakot/keras-resnet/blob/master/resnet.py
 
 from __future__ import division
 import six
