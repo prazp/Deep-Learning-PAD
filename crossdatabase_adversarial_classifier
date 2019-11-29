@@ -28,6 +28,7 @@ DATADIR = "/mnt/c/Users/prasa/code/Thesis"
 #DATADIR = "../../../g/data1a/wa66/Prasanth"
 bestEER = 1
 
+#callback run every epoch
 class developmentSetEval(Callback):
 
     def __init__(self, y_test_saved):
@@ -312,7 +313,7 @@ model_combined.compile(optimizer=adam, loss=[masked_loss_function, categorical_f
 model_combined.fit(
         x=X_domain,
         y=[y_class, y_domain],
-        epochs=20,
+        epochs=30,
         batch_size=8,
         verbose=2,
         validation_data= (X_test_2016, [y_test_2016, y_test_domain]), callbacks=[tensorboard, developmentSetEval(y_test_2016_saved)])
