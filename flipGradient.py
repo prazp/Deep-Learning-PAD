@@ -2,6 +2,8 @@ import tensorflow as tf
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras import backend as K
 
+#based of https://github.com/michetonu/gradient_reversal_keras_tf/blob/master/flipGradientTF.py
+
 def reverse_gradient(X, hp_lambda):
     '''Flips the sign of the incoming gradient during training.'''
     try:
