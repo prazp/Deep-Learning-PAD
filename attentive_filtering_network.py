@@ -332,12 +332,12 @@ model.compile(
         loss="binary_crossentropy",
         metrics=['accuracy'])
 
-model.compile(loss=[losses.binary_focal_loss(alpha=.25, gamma=2)], metrics=["accuracy"], optimizer=adam)
+#model.compile(loss=[losses.binary_focal_loss(alpha=.25, gamma=2)], metrics=["accuracy"], optimizer=adam)
 
 model.fit(
         x=X_train,
         y=y_train,
-        epochs=15,
+        epochs=30,
         batch_size=4,
         verbose=2,
         validation_data= (X_test, y_test), callbacks=[tensorboard, developmentSetEval(y_test_saved)])
