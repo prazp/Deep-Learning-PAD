@@ -119,6 +119,8 @@ np.random.seed(1)
 tf.set_random_seed(1)
 tf.reset_default_graph()
 
+
+#2016 database
 #Training Data
 pickle_in = open(os.path.join(DATADIR, "BTAS2016_spectrain_genuine.pickle"), "rb")
 specTrain_genuine_2016 = pickle.load(pickle_in)
@@ -138,6 +140,7 @@ pickle_in = open(os.path.join(DATADIR, "BTAS2016_speceval.pickle"), "rb")
 specEval_2016 = pickle.load(pickle_in)
 pickle_in.close()
 
+#2017 database
 #Training Data
 pickle_in = open(os.path.join(DATADIR, "specTrain_win400_hop160_5s_norm.pickle"), "rb")
 specTrain_2017 = pickle.load(pickle_in)
@@ -159,6 +162,8 @@ y_class = []
 
 X_train = []
 y_train = []
+
+#2017 is the source domain and 2016 is the target domain
 
 for res in specTrain_2017:
     #X_train.append(res[0])
